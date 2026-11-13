@@ -326,19 +326,41 @@ async function preloadVideo(){
       setLoad(total ? got / total : 0, got);
     }
     setLoad(1, got);
-    vid.src = URL.createObjectURL(new Blob(chunks, { type: 'video/mp4' }));
+    const blobUrl = URL.createObjectURL(new Blob(chunks, { type: 'video/mp4' }));
+    let settled = false;
+    const fail = () => {                       // browser refused the in-memory copy → stream it instead
+      if (settled) return; settled = true;
+      vid.removeEventListener('loadedmetadata', ok);
+      URL.revokeObjectURL(blobUrl);
+      streamVideo();
+    };
+    const ok = () => {
+      if (settled) return; settled = true;
+      vid.removeEventListener('error', fail);
+      onVideoReady();
+    };
+    vid.addEventListener('loadedmetadata', ok, { once: true });
+    vid.addEventListener('error', fail, { once: true });
+    setTimeout(() => { if (!settled && vid.readyState < 1) fail(); }, 6000);
+    vid.src = blobUrl;
     vid.preload = 'auto';
-    vid.addEventListener('loadeddata', onVideoReady, { once: true });
     vid.load();
   }catch(e){
-    // Fallback: let the browser buffer it and wait until it says it can play through.
-    vid.src = VIDEO_URL; vid.preload = 'auto';
-    vid.addEventListener('progress', () => {
-      if (vid.duration && vid.buffered.length) setLoad(vid.buffered.end(vid.buffered.length - 1) / vid.duration);
-    });
-    vid.addEventListener('canplaythrough', onVideoReady, { once: true });
-    vid.load();
+    streamVideo();
   }
+}
+// Fallback: stream from the server and wait until the browser says it can play through.
+function streamVideo(){
+  if (videoReady) return;
+  $('#loadText').textContent = 'Loading video…';
+  vid.src = VIDEO_URL; vid.preload = 'auto';
+  vid.addEventListener('progress', () => {
+    if (vid.duration && vid.buffered.length) setLoad(vid.buffered.end(vid.buffered.length - 1) / vid.duration);
+  });
+  vid.addEventListener('canplaythrough', onVideoReady, { once: true });
+  // iPhones may not buffer ahead before the first tap; don't leave Play locked forever.
+  vid.addEventListener('loadedmetadata', () => setTimeout(onVideoReady, 15000), { once: true });
+  vid.load();
 }
 preloadVideo();
 function playFrom(t){ try{ vid.currentTime = t; }catch(e){} const p = vid.play(); if (p && p.catch) p.catch(()=>{}); }
@@ -346,6 +368,8 @@ function playFrom(t){ try{ vid.currentTime = t; }catch(e){} const p = vid.play()
 /* ---------------- audio ---------------- */
 let actx = null, noiseBuf = null;
 function ensureAudio(){
+  // iOS 17+: play effects even when the ring/silent switch is on silent (like the video does).
+  try{ if (navigator.audioSession && navigator.audioSession.type !== 'playback') navigator.audioSession.type = 'playback'; }catch(e){}
   try{
     if (!actx){
       actx = new (window.AudioContext || window.webkitAudioContext)();

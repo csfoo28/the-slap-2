@@ -1,0 +1,6 @@
+# Local-only: self-signed HTTPS cert + private key for LAN testing
+certs/
+# Local tool settings/caches
+.claude/
+.impeccable/
+node_modules/

@@ -1,0 +1,641 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Slap Along</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Barlow:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#000; --panel:rgba(29,18,18,.92); --line:#3a2424; --ink:#fff4ec; --mute:#c9b6ac;
+    --hot:#ff3b2f; --hot2:#ffb000; --good:#3ddc84; --great:#38bdf8; --perfect:#ffd400; --miss:#a8968f;
+    --radius:16px; --u:3.75px; /* 1% of the landscape height, set by JS */
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:Barlow,system-ui,sans-serif;overflow:hidden;overscroll-behavior:none}
+  body{position:fixed;inset:0;user-select:none;-webkit-user-select:none}
+
+  /* Landscape root: rotated 90° by JS when a phone is held upright */
+  #rot{position:absolute;left:0;top:0;width:100vw;height:100vh;overflow:hidden;background:#000;transform-origin:0 0;touch-action:manipulation}
+  #vid{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
+  #flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+  #popup{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);font-family:Bangers,Impact,sans-serif;font-size:calc(var(--u)*17);letter-spacing:2px;pointer-events:none;opacity:0;text-shadow:0 4px 0 #000,0 0 24px rgba(0,0,0,.7);white-space:nowrap;text-align:center;line-height:.9}
+  #popup small{display:block;font-family:Barlow,sans-serif;font-size:calc(var(--u)*4);font-weight:800;letter-spacing:2px}
+  .shake{animation:shake .28s}
+  @keyframes shake{20%{transform:translate(-8px,3px) rotate(-.6deg)}40%{transform:translate(7px,-4px) rotate(.6deg)}60%{transform:translate(-5px,2px)}80%{transform:translate(3px,-1px)}}
+
+  button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:11px 16px;font-weight:800;color:var(--ink);background:#2c1b1b;box-shadow:inset 0 0 0 1px var(--line)}
+  button:active{transform:scale(.97)}
+  button:disabled{opacity:.45;cursor:default;transform:none}
+  button.big{font-family:Bangers,Impact,sans-serif;font-weight:400;font-size:28px;letter-spacing:1.5px;padding:12px;background:var(--hot);box-shadow:0 5px 0 #9b1a12;width:100%}
+  button.big:active{transform:translateY(4px);box-shadow:0 1px 0 #9b1a12}
+  button.ghost{background:rgba(0,0,0,.45);box-shadow:inset 0 0 0 1px rgba(255,255,255,.18);padding:8px 14px;font-size:14px}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .row>button{flex:1}
+
+  /* ---------- HUD (play) ---------- */
+  #hud{position:absolute;inset:0;pointer-events:none;display:none}
+  .playing #hud{display:block}
+  #hud button{pointer-events:auto}
+  .topbar{position:absolute;top:calc(var(--u)*3);left:max(16px,env(safe-area-inset-left));right:max(16px,env(safe-area-inset-right));display:flex;justify-content:space-between;align-items:flex-start}
+  .score{display:flex;gap:18px;font-weight:800;font-variant-numeric:tabular-nums;text-align:right;text-shadow:0 2px 6px #000}
+  .score small{display:block;font-size:11px;color:var(--mute);letter-spacing:1.5px}
+  .score b{font-size:calc(var(--u)*7)}
+  .target{position:absolute;right:max(20px,env(safe-area-inset-right));bottom:calc(var(--u)*12);width:calc(var(--u)*30);aspect-ratio:1;display:flex;align-items:center;justify-content:center}
+  .core{width:100%;height:100%;border-radius:50%;background:radial-gradient(circle at 40% 35%,#ff6a5f,var(--hot) 55%,#8e140d);display:flex;align-items:center;justify-content:center;font-size:calc(var(--u)*13);box-shadow:0 0 0 5px rgba(255,59,47,.25),0 6px 24px rgba(0,0,0,.6);opacity:.92}
+  .core.hit{animation:pop .25s}
+  @keyframes pop{40%{transform:scale(1.2)}}
+  .ring{position:absolute;inset:0;border-radius:50%;border:5px solid var(--ink);opacity:0;box-shadow:0 0 12px rgba(0,0,0,.6)}
+  .cue-label{position:absolute;top:100%;left:-60%;right:-60%;margin-top:6px;text-align:center;font-family:Bangers,Impact,sans-serif;font-size:calc(var(--u)*6);letter-spacing:2px;color:var(--ink);text-shadow:0 2px 6px #000}
+  .cue-label.now{color:var(--perfect)}
+  .cue-label.hint{font-family:Barlow,sans-serif;font-size:13px;letter-spacing:0;font-weight:800}
+  .meter{height:12px;background:rgba(0,0,0,.55);border-radius:8px;overflow:hidden;position:relative;box-shadow:inset 0 0 0 1px var(--line)}
+  .meter i{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,var(--good),var(--hot2),var(--hot))}
+  .meter u{position:absolute;top:0;bottom:0;width:2px;background:var(--ink);left:50%}
+  #hud .meter{position:absolute;left:max(16px,env(safe-area-inset-left));bottom:calc(var(--u)*8);width:24%}
+  .timeline{position:absolute;left:max(16px,env(safe-area-inset-left));right:max(16px,env(safe-area-inset-right));bottom:calc(var(--u)*3);height:6px;background:rgba(255,255,255,.18);border-radius:6px}
+  #progress{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--hot),var(--hot2));border-radius:6px;width:0}
+  .mk{position:absolute;top:-4px;width:4px;height:14px;margin-left:-2px;border-radius:2px;background:var(--ink)}
+  .mk.perfect{background:var(--perfect)} .mk.great{background:var(--great)} .mk.good{background:var(--good)} .mk.miss{background:var(--miss);opacity:.6}
+
+  /* ---------- overlays ---------- */
+  section{position:absolute;inset:0;display:none;padding:16px max(16px,env(safe-area-inset-right)) 16px max(16px,env(safe-area-inset-left));overflow:auto}
+  section.on{display:flex}
+  section.dim{background:radial-gradient(ellipse at center,rgba(0,0,0,.55),rgba(0,0,0,.85));align-items:center;justify-content:center}
+  .menu{display:grid;grid-template-columns:1fr 1fr;gap:16px;width:100%;max-width:820px;margin:auto}
+  .card{background:var(--panel);border-radius:var(--radius);padding:14px 16px;box-shadow:inset 0 0 0 1px var(--line);display:flex;flex-direction:column;gap:10px}
+  h1{font-family:Bangers,Impact,sans-serif;font-weight:400;letter-spacing:1px;font-size:46px;margin:0;line-height:1}
+  h1 span{color:var(--hot)}
+  p{margin:0;color:var(--mute);line-height:1.4;font-size:15px}
+  .warn{color:var(--hot2)}
+  .status{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--mute)}
+  .dot{width:10px;height:10px;border-radius:50%;background:var(--miss);flex:none}
+  .dot.ok{background:var(--good)} .dot.bad{background:var(--hot)}
+  label.slider{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--mute)}
+  label.slider input{flex:1;accent-color:var(--hot)}
+  .small{font-size:13px}
+
+  /* results */
+  .results{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center;width:100%;max-width:720px;margin:auto}
+  .grade{font-family:Bangers,Impact,sans-serif;font-size:calc(var(--u)*34);line-height:1;text-align:center;color:var(--perfect);text-shadow:0 6px 0 #9b1a12}
+  .grade-title{text-align:center;font-weight:800;font-size:18px}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center}
+  .stats div{background:rgba(0,0,0,.5);border-radius:12px;padding:8px 4px}
+  .stats b{display:block;font-size:22px;font-variant-numeric:tabular-nums}
+  .stats small{font-size:10px;letter-spacing:1px;color:var(--mute);font-weight:800}
+
+  /* mark: video stays visible, panel on the right */
+  #scrMark{justify-content:flex-end;padding:10px max(10px,env(safe-area-inset-right)) 10px 10px}
+  .markpanel{width:min(44%,380px);height:100%;background:var(--panel);border-radius:var(--radius);padding:12px;display:flex;flex-direction:column;gap:8px;box-shadow:inset 0 0 0 1px var(--line);overflow:auto}
+  .marktime{font-variant-numeric:tabular-nums;font-weight:800;font-size:20px;text-align:center}
+  .tapzone{flex:none;font-family:Bangers,Impact,sans-serif;font-size:32px;letter-spacing:2px;background:var(--hot);border-radius:14px;min-height:calc(var(--u)*22);display:flex;align-items:center;justify-content:center;box-shadow:0 5px 0 #9b1a12}
+  .tapzone:active{transform:translateY(4px);box-shadow:0 1px 0 #9b1a12}
+  .cuelist{display:flex;flex-direction:column;gap:5px;min-height:60px;overflow:auto;flex:1}
+  .cuelist .c{display:flex;align-items:center;gap:5px;background:rgba(0,0,0,.5);border-radius:10px;padding:4px 6px}
+  .cuelist .c span{flex:1;font-weight:800;font-variant-numeric:tabular-nums;font-size:14px}
+  .cuelist .c button{padding:6px 10px;border-radius:8px;font-size:12px}
+  .markpanel .row button{padding:9px 8px;font-size:13px}
+  textarea{width:100%;background:rgba(0,0,0,.5);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px;font:600 11px ui-monospace,monospace;resize:none}
+  .empty{color:var(--mute);font-size:13px;text-align:center;padding:6px}
+  #btnFs{position:absolute;top:10px;right:max(10px,env(safe-area-inset-right));z-index:5}
+  .playing #btnFs,.marking #btnFs{display:none}
+</style>
+</head>
+<body>
+<div id="rot">
+  <video id="vid" playsinline webkit-playsinline preload="none"></video>
+  <div id="flash"></div>
+  <div id="popup"></div>
+
+  <!-- PLAY HUD -->
+  <div id="hud">
+    <div class="topbar">
+      <button class="ghost" id="btnQuit">✕ Quit</button>
+      <div class="score">
+        <div><small>COMBO</small><b id="hudCombo">0</b></div>
+        <div><small>SCORE</small><b id="hudScore">0</b></div>
+      </div>
+    </div>
+    <div class="target">
+      <div class="ring" id="ring"></div>
+      <div class="core" id="core">🖐️</div>
+      <div class="cue-label hint" id="cueLabel">GET READY</div>
+    </div>
+    <div class="meter"><i id="meterPlay"></i><u></u></div>
+  </div>
+  <div class="timeline" id="timeline"><div id="progress"></div></div>
+
+  <!-- START -->
+  <section id="scrStart" class="dim on">
+    <div class="menu">
+      <div class="card">
+        <h1>THE SLAP <span>2</span></h1>
+        <p>When the ring closes on the hand, <b>swing your phone like a slap</b>. Hit it on time and hard for big points.</p>
+        <p class="warn">Grip your phone tight (or use a wrist strap) and keep clear of people and furniture.</p>
+        <p class="small" id="cueInfo"></p>
+      </div>
+      <div class="card">
+        <div class="status"><span class="dot" id="motionDot"></span><span id="motionText">Motion sensor not enabled yet</span></div>
+        <div class="meter"><i id="meterStart"></i><u></u></div>
+        <label class="slider">Sensitivity <input id="sens" type="range" min="0.5" max="2" step="0.1" value="1"><b id="sensVal">1.0×</b></label>
+        <button id="btnTest">Enable motion &amp; test swing</button>
+        <p class="small" id="testMsg"></p>
+        <div id="loadBox">
+          <div class="meter"><i id="loadBar" style="background:linear-gradient(90deg,var(--hot),var(--hot2))"></i></div>
+          <p class="small" id="loadText" style="margin-top:6px">Loading video… 0%</p>
+        </div>
+        <button class="big" id="btnPlay" disabled>LOADING…</button>
+        <button class="ghost" id="btnMark" disabled>Mark slap moments</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section id="scrResults" class="dim">
+    <div class="results card">
+      <div>
+        <div class="grade" id="grade">S</div>
+        <div class="grade-title" id="gradeTitle">Certified Slapper</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="stats">
+          <div><b id="rPerfect">0</b><small>PERFECT</small></div>
+          <div><b id="rGreat">0</b><small>GREAT</small></div>
+          <div><b id="rGood">0</b><small>GOOD</small></div>
+          <div><b id="rMiss">0</b><small>MISS</small></div>
+        </div>
+        <div class="stats" style="grid-template-columns:repeat(3,1fr)">
+          <div><b id="rScore">0</b><small>SCORE</small></div>
+          <div><b id="rCombo">0</b><small>MAX COMBO</small></div>
+          <div><b id="rPower">0</b><small>BEST POWER</small></div>
+        </div>
+        <p id="rBest" class="small" style="text-align:center"></p>
+        <button class="big" id="btnAgain">SLAP AGAIN</button>
+        <button class="ghost" id="btnHome">Home</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- MARK -->
+  <section id="scrMark">
+    <div class="markpanel">
+      <div class="marktime" id="markTime">0.00s</div>
+      <div class="tapzone" id="tapzone">SLAP HERE</div>
+      <div class="row">
+        <button id="mPlay">Play / Pause</button>
+        <button id="mBack">−5s</button>
+        <button id="mRestart">Restart</button>
+      </div>
+      <div class="cuelist" id="cueList"></div>
+      <div class="row">
+        <button id="mClear">Clear all</button>
+        <button id="mSave" style="background:#b81c14">Save &amp; done</button>
+      </div>
+      <textarea id="mExport" rows="2" readonly placeholder="Share link appears here"></textarea>
+    </div>
+  </section>
+
+  <button class="ghost" id="btnFs">⛶ Fullscreen</button>
+</div>
+
+<script>
+/* ---------------- config ---------------- */
+// Seconds into the video where each slap lands (from MM:SS:frames timecodes at 25 fps).
+const DEFAULT_CUES = [33.92, 36.16, 37.08, 38.00, 38.84, 40.08, 41.36, 42.28, 43.00, 48.48, 49.52, 54.12, 56.72, 57.52, 58.24, 58.80, 59.44, 60.00, 60.56, 61.00, 61.68, 65.40, 70.84];
+const LEAD = 1.6;                                   // seconds the ring takes to close
+const WIN = { perfect: 0.13, great: 0.26, good: 0.42 };
+const PTS = { perfect: 300, great: 200, good: 100 };
+const BASE_ACC = 15;   // m/s² of linear acceleration that counts as a swing at 1.0× sensitivity
+const BASE_ROT = 380;  // deg/s of rotation that counts as a swing at 1.0× sensitivity
+const MARK_REACTION = 0.12; // subtract typical tap reaction time when marking
+
+/* ---------------- storage (safe) ---------------- */
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+function loadCues(){
+  const q = new URLSearchParams(location.search).get('cues');
+  if (q){ const a = q.split(',').map(Number).filter(n => isFinite(n) && n >= 0); if (a.length) return a.sort((x,y)=>x-y); }
+  const s = store.get('slap2.cues', null);
+  if (Array.isArray(s) && s.length) return s;
+  return DEFAULT_CUES.slice();
+}
+
+/* ---------------- state ---------------- */
+const $ = s => document.querySelector(s);
+const vid = $('#vid'), rot = $('#rot');
+let cues = loadCues();
+let sens = store.get('slap2.sens', 1);
+let duration = 72;
+let mode = 'idle';           // idle | test | play | mark | results
+let judged = [];
+let score = 0, combo = 0, maxCombo = 0, bestPower = 0;
+let counts = { perfect:0, great:0, good:0, miss:0 };
+let motionListening = false, motionSeen = false, motionGranted = false, motionAsked = false;
+let lastSwingAt = 0, livePower = 0;
+
+/* ---------------- landscape layout ---------------- */
+const isTouch = matchMedia('(pointer: coarse)').matches;
+function layout(){
+  const w = innerWidth, h = innerHeight;
+  if (!w || !h){ rot.style.width = rot.style.height = rot.style.transform = ''; return; }
+  const portrait = isTouch && h > w;           // phone held upright → rotate the game sideways
+  if (portrait){
+    rot.style.width = h + 'px'; rot.style.height = w + 'px';
+    rot.style.transform = `translateX(${w}px) rotate(90deg)`;
+  } else {
+    rot.style.width = w + 'px'; rot.style.height = h + 'px';
+    rot.style.transform = '';
+  }
+  rot.style.setProperty('--u', (portrait ? w : h) / 100 + 'px');
+}
+addEventListener('resize', layout);
+addEventListener('orientationchange', () => setTimeout(layout, 150));
+layout();
+
+function goFullscreen(){
+  const el = document.documentElement;
+  const rf = el.requestFullscreen || el.webkitRequestFullscreen;
+  if (!rf || document.fullscreenElement || document.webkitFullscreenElement) return;
+  try{
+    const p = rf.call(el, { navigationUI: 'hide' });
+    const lock = () => { try{ screen.orientation && screen.orientation.lock && screen.orientation.lock('landscape').catch(()=>{}); }catch(e){} };
+    if (p && p.then) p.then(lock).catch(()=>{}); else lock();
+  }catch(e){}
+}
+function syncFsButton(){
+  const can = !!(document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen);
+  const on = !!(document.fullscreenElement || document.webkitFullscreenElement);
+  $('#btnFs').style.display = can && !on ? '' : 'none';
+}
+document.addEventListener('fullscreenchange', () => { syncFsButton(); setTimeout(layout, 100); });
+document.addEventListener('webkitfullscreenchange', syncFsButton);
+syncFsButton();
+
+/* ---------------- video ---------------- */
+vid.addEventListener('loadedmetadata', () => { duration = vid.duration || duration; renderMarkers(); });
+vid.addEventListener('ended', () => { if (mode === 'play') endGame(); });
+if (vid.readyState >= 1) duration = vid.duration || duration;
+const vtime = () => vid.currentTime || 0;
+
+// Download the whole video before allowing play, so it never stalls mid-game.
+const VIDEO_URL = 'media/the-slap-2-360p.mp4';
+let videoReady = false;
+const loadStart = performance.now();
+function setLoad(frac, got){
+  $('#loadBar').style.width = Math.round(frac * 100) + '%';
+  let txt = `Loading video… ${Math.round(frac * 100)}%`;
+  if (got){
+    const secs = (performance.now() - loadStart) / 1000;
+    const rate = got / Math.max(secs, 0.1);                 // bytes per second
+    txt += ` · ${(got / 1048576).toFixed(1)} MB · ${(rate / 1024).toFixed(0)} KB/s`;
+    if (frac > 0.02 && frac < 1){
+      const left = Math.ceil((got / frac - got) / rate);
+      txt += ` · ~${left}s left`;
+    }
+  }
+  $('#loadText').textContent = txt;
+}
+function onVideoReady(){
+  if (videoReady) return;
+  videoReady = true;
+  $('#loadBox').style.display = 'none';
+  $('#btnMark').disabled = false;
+  $('#btnPlay').disabled = false;
+  refreshStart();
+  try{ vid.currentTime = 0.5; }catch(e){}   // show a frame behind the menu
+}
+async function preloadVideo(){
+  try{
+    const res = await fetch(VIDEO_URL);
+    if (!res.ok || !res.body) throw new Error('fetch failed');
+    const total = +res.headers.get('Content-Length') || 0;
+    const reader = res.body.getReader();
+    const chunks = []; let got = 0;
+    for (;;){
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value); got += value.length;
+      setLoad(total ? got / total : 0, got);
+    }
+    setLoad(1, got);
+    vid.src = URL.createObjectURL(new Blob(chunks, { type: 'video/mp4' }));
+    vid.preload = 'auto';
+    vid.addEventListener('loadeddata', onVideoReady, { once: true });
+    vid.load();
+  }catch(e){
+    // Fallback: let the browser buffer it and wait until it says it can play through.
+    vid.src = VIDEO_URL; vid.preload = 'auto';
+    vid.addEventListener('progress', () => {
+      if (vid.duration && vid.buffered.length) setLoad(vid.buffered.end(vid.buffered.length - 1) / vid.duration);
+    });
+    vid.addEventListener('canplaythrough', onVideoReady, { once: true });
+    vid.load();
+  }
+}
+preloadVideo();
+function playFrom(t){ try{ vid.currentTime = t; }catch(e){} const p = vid.play(); if (p && p.catch) p.catch(()=>{}); }
+
+/* ---------------- audio ---------------- */
+let actx = null, noiseBuf = null;
+function ensureAudio(){
+  try{
+    if (!actx){
+      actx = new (window.AudioContext || window.webkitAudioContext)();
+      const n = Math.floor(actx.sampleRate * 0.2);
+      noiseBuf = actx.createBuffer(1, n, actx.sampleRate);
+      const d = noiseBuf.getChannelData(0);
+      for (let i = 0; i < n; i++) d[i] = (Math.random()*2-1) * Math.pow(1 - i/n, 5);
+    }
+    if (actx.state === 'suspended') actx.resume();
+  }catch(e){}
+}
+function playSlap(p = 1){
+  if (!actx) return;
+  const t = actx.currentTime;
+  const src = actx.createBufferSource(); src.buffer = noiseBuf;
+  const bp = actx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1600 + Math.random()*700; bp.Q.value = 0.7;
+  const g = actx.createGain(); g.gain.value = Math.min(1.6, 0.6 + 0.4*p);
+  src.connect(bp).connect(g).connect(actx.destination); src.start(t);
+  const o = actx.createOscillator(), og = actx.createGain();
+  o.frequency.setValueAtTime(190, t); o.frequency.exponentialRampToValueAtTime(55, t + 0.09);
+  og.gain.setValueAtTime(0.55, t); og.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+  o.connect(og).connect(actx.destination); o.start(t); o.stop(t + 0.14);
+}
+function playWhiff(){
+  if (!actx) return;
+  const t = actx.currentTime;
+  const src = actx.createBufferSource(); src.buffer = noiseBuf; src.playbackRate.value = 0.35;
+  const f = actx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.setValueAtTime(600, t); f.frequency.linearRampToValueAtTime(1800, t+.15);
+  const g = actx.createGain(); g.gain.value = 0.35;
+  src.connect(f).connect(g).connect(actx.destination); src.start(t);
+}
+
+/* ---------------- motion ---------------- */
+async function enableMotion(){
+  if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function' && !motionGranted){
+    motionAsked = true;
+    try{
+      const r = await DeviceMotionEvent.requestPermission();
+      if (r !== 'granted'){ setMotionStatus('bad', 'Motion permission denied — tap the screen to slap instead'); return false; }
+    }catch(e){ setMotionStatus('bad', 'Could not get motion permission (page must be on HTTPS)'); return false; }
+  }
+  motionGranted = true;
+  if (!motionListening){ window.addEventListener('devicemotion', onMotion); motionListening = true; }
+  setTimeout(() => { if (!motionSeen) setMotionStatus('bad', 'No motion sensor found — tap the screen or press Space to slap'); }, 1200);
+  return true;
+}
+function needsPermissionPrompt(){
+  return typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function' && !motionGranted && !motionAsked;
+}
+function setMotionStatus(cls, text){ $('#motionDot').className = 'dot ' + cls; $('#motionText').textContent = text; }
+
+function onMotion(e){
+  let acc = 0;
+  const a = e.acceleration;
+  if (a && a.x != null){ acc = Math.hypot(a.x, a.y, a.z); }
+  else if (e.accelerationIncludingGravity && e.accelerationIncludingGravity.x != null){
+    const g = e.accelerationIncludingGravity; acc = Math.abs(Math.hypot(g.x, g.y, g.z) - 9.81);
+  } else return;
+  const r = e.rotationRate;
+  const rr = r ? Math.hypot(r.alpha || 0, r.beta || 0, r.gamma || 0) : 0;
+  if (!motionSeen){ motionSeen = true; setMotionStatus('ok', 'Motion sensor ready — give it a swing!'); }
+  const p = Math.max(acc / (BASE_ACC / sens), rr / (BASE_ROT / sens));
+  livePower = Math.max(livePower, p);
+  if (p >= 1) swing(p);
+}
+
+function swing(p){
+  const now = performance.now();
+  if (now - lastSwingAt < 380) return;   // one swing = one slap
+  lastSwingAt = now;
+  if (mode === 'test'){
+    ensureAudio(); playSlap(p); flash(0.5);
+    $('#testMsg').textContent = `SLAP! Power ${Math.round(p*100)}. ${p < 1.4 ? 'Swing harder for bonus points.' : 'Monster slap.'}`;
+    return;
+  }
+  if (mode !== 'play') return;
+  judgeSwing(p);
+}
+
+/* ---------------- screens ---------------- */
+function show(id){
+  document.querySelectorAll('section').forEach(s => s.classList.toggle('on', s.id === id));
+  rot.classList.toggle('playing', id === null && mode === 'play');
+  rot.classList.toggle('marking', id === 'scrMark');
+}
+
+/* ---------------- game ---------------- */
+function startGame(){
+  if (!cues.length){ enterMark(); return; }
+  mode = 'play';
+  judged = cues.map(() => null);
+  score = 0; combo = 0; maxCombo = 0; bestPower = 0;
+  counts = { perfect:0, great:0, good:0, miss:0 };
+  updateHud(); renderMarkers(); show(null);
+  playFrom(0);
+}
+
+function judgeSwing(p){
+  const t = vtime();
+  let best = -1, bestDt = Infinity;
+  cues.forEach((c, i) => { if (judged[i]) return; const dt = t - c; if (Math.abs(dt) < Math.abs(bestDt)){ bestDt = dt; best = i; } });
+  if (best < 0 || Math.abs(bestDt) > WIN.good){
+    playWhiff(); combo = 0; updateHud();
+    popup('WHIFF', 'var(--miss)', best >= 0 && bestDt < 0 && bestDt > -1.2 ? 'TOO EARLY' : '');
+    return;
+  }
+  const ad = Math.abs(bestDt);
+  const j = ad <= WIN.perfect ? 'perfect' : ad <= WIN.great ? 'great' : 'good';
+  judged[best] = j; counts[j]++;
+  combo++; maxCombo = Math.max(maxCombo, combo);
+  bestPower = Math.max(bestPower, p);
+  const mult = 1 + Math.floor(combo / 3) * 0.5;
+  score += Math.round((PTS[j] + Math.min(150, (p - 1) * 100)) * mult);
+  playSlap(p); flash(Math.min(0.9, 0.4 + p * 0.2)); shake();
+  try{ navigator.vibrate && navigator.vibrate(Math.min(120, 40 + p * 30)); }catch(e){}
+  const core = $('#core'); core.classList.remove('hit'); void core.offsetWidth; core.classList.add('hit');
+  const sub = j === 'perfect' ? `POWER ${Math.round(p*100)}` : (bestDt < 0 ? 'EARLY' : 'LATE');
+  popup(j.toUpperCase() + '!', `var(--${j})`, sub);
+  renderMarkers(); updateHud();
+}
+
+function missCue(i){
+  judged[i] = 'miss'; counts.miss++; combo = 0;
+  popup('MISS', 'var(--miss)', 'SWING!');
+  renderMarkers(); updateHud();
+}
+
+function endGame(){
+  mode = 'results';
+  cues.forEach((c, i) => { if (!judged[i]){ judged[i] = 'miss'; counts.miss++; } });
+  const acc = (counts.perfect + counts.great * 0.75 + counts.good * 0.45) / cues.length;
+  const [g, title] = acc >= 0.92 ? ['S', 'Certified Slapper'] : acc >= 0.75 ? ['A', 'Heavy Hand'] : acc >= 0.55 ? ['B', 'Solid Palm'] : acc >= 0.35 ? ['C', 'Gentle Tap'] : ['D', 'Air Swatter'];
+  $('#grade').textContent = g; $('#gradeTitle').textContent = title;
+  $('#rPerfect').textContent = counts.perfect; $('#rGreat').textContent = counts.great;
+  $('#rGood').textContent = counts.good; $('#rMiss').textContent = counts.miss;
+  $('#rScore').textContent = score; $('#rCombo').textContent = maxCombo; $('#rPower').textContent = Math.round(bestPower * 100);
+  const prev = store.get('slap2.best', 0);
+  if (score > prev){ store.set('slap2.best', score); $('#rBest').textContent = prev ? 'New personal best!' : ''; }
+  else $('#rBest').textContent = `Personal best: ${prev}`;
+  show('scrResults');
+}
+
+function goHome(){ mode = 'idle'; vid.pause(); show('scrStart'); refreshStart(); }
+function updateHud(){ $('#hudScore').textContent = score; $('#hudCombo').textContent = combo; }
+
+/* ---------------- fx ---------------- */
+function popup(text, color, sub){
+  const el = $('#popup');
+  el.innerHTML = text + (sub ? `<small>${sub}</small>` : '');
+  el.style.color = color;
+  el.animate([{opacity:0, transform:'translate(-50%,-50%) scale(.5)'},{opacity:1, transform:'translate(-50%,-50%) scale(1.15)', offset:.2},{opacity:1, transform:'translate(-50%,-50%) scale(1)', offset:.7},{opacity:0, transform:'translate(-50%,-60%) scale(1)'}], {duration:700, easing:'ease-out'});
+}
+function flash(o){ $('#flash').animate([{opacity:o},{opacity:0}], {duration:180, easing:'ease-out'}); }
+function shake(){ vid.classList.remove('shake'); void vid.offsetWidth; vid.classList.add('shake'); }
+
+function renderMarkers(list = cues, colored = mode === 'play'){
+  const tl = $('#timeline');
+  tl.querySelectorAll('.mk').forEach(m => m.remove());
+  list.forEach((c, i) => {
+    const m = document.createElement('div');
+    m.className = 'mk' + (colored && judged[i] ? ' ' + judged[i] : '');
+    m.style.left = (c / duration * 100) + '%';
+    tl.appendChild(m);
+  });
+}
+
+/* ---------------- main loop ---------------- */
+function loop(){
+  requestAnimationFrame(loop);
+  livePower *= 0.9;
+  const w = Math.min(100, livePower * 50) + '%';
+  $('#meterStart').style.width = w; $('#meterPlay').style.width = w;
+  const t = vtime();
+  $('#progress').style.width = Math.min(100, t / duration * 100) + '%';
+
+  if (mode === 'play'){
+    cues.forEach((c, i) => { if (!judged[i] && t > c + WIN.good) missCue(i); });
+    let next = -1;
+    for (let i = 0; i < cues.length; i++) if (!judged[i]){ next = i; break; }
+    const ring = $('#ring'), label = $('#cueLabel');
+    if (next >= 0){
+      const dt = cues[next] - t;
+      if (dt <= LEAD){
+        const k = Math.max(0, dt) / LEAD;
+        ring.style.opacity = 1;
+        ring.style.transform = `scale(${1 + k * 1.4})`;
+        ring.style.borderColor = Math.abs(dt) <= WIN.perfect ? 'var(--perfect)' : 'var(--ink)';
+        label.className = 'cue-label' + (Math.abs(dt) <= WIN.great ? ' now' : '');
+        label.textContent = Math.abs(dt) <= WIN.great ? 'SLAP!' : 'WIND UP…';
+      } else {
+        ring.style.opacity = 0;
+        label.className = 'cue-label hint';
+        label.textContent = `Next slap in ${Math.ceil(dt)}s`;
+      }
+    } else {
+      ring.style.opacity = 0; label.className = 'cue-label'; label.textContent = 'NICE WORK';
+    }
+  }
+  if (mode === 'mark') $('#markTime').textContent = t.toFixed(2) + 's';
+}
+requestAnimationFrame(loop);
+
+/* ---------------- mark mode ---------------- */
+let draft = [];
+function enterMark(){
+  mode = 'mark'; draft = cues.slice(); renderCueList(); show('scrMark');
+  playFrom(0);
+}
+function renderCueList(){
+  const list = $('#cueList');
+  draft.sort((a, b) => a - b);
+  list.innerHTML = draft.length ? '' : '<div class="empty">No slaps marked yet.</div>';
+  draft.forEach((c, i) => {
+    const row = document.createElement('div'); row.className = 'c';
+    row.innerHTML = `<span>#${i+1} · ${c.toFixed(2)}s</span>
+      <button data-a="prev">▶</button><button data-a="dn">−</button><button data-a="up">+</button><button data-a="del">✕</button>`;
+    row.addEventListener('click', ev => {
+      const a = ev.target.dataset.a; if (!a) return;
+      if (a === 'prev'){ playFrom(Math.max(0, draft[i] - 2)); return; }
+      if (a === 'dn') draft[i] = Math.max(0, +(draft[i] - 0.04).toFixed(2));
+      if (a === 'up') draft[i] = +(draft[i] + 0.04).toFixed(2);
+      if (a === 'del') draft.splice(i, 1);
+      renderCueList();
+    });
+    list.appendChild(row);
+  });
+  const csv = draft.map(c => c.toFixed(2)).join(',');
+  $('#mExport').value = draft.length ? `${location.origin}${location.pathname}?cues=${csv}` : '';
+  renderMarkers(draft, false);
+}
+function markNow(){
+  if (mode !== 'mark') return;
+  const t = Math.max(0, vtime() - MARK_REACTION);
+  draft.push(+t.toFixed(2)); ensureAudio(); playSlap(1); flash(.4); renderCueList();
+}
+
+/* ---------------- start screen ---------------- */
+function refreshStart(){
+  $('#cueInfo').textContent = cues.length ? `${cues.length} slaps in this round.` : 'No slap moments set yet — tap "Mark slap moments" first.';
+  $('#btnPlay').textContent = !videoReady ? 'LOADING…' : cues.length ? 'PLAY' : 'MARK THE SLAPS FIRST';
+  renderMarkers(cues, false);
+}
+$('#sens').value = sens; $('#sensVal').textContent = (+sens).toFixed(1) + '×';
+$('#sens').addEventListener('input', e => { sens = +e.target.value; $('#sensVal').textContent = sens.toFixed(1) + '×'; store.set('slap2.sens', sens); });
+
+$('#btnFs').addEventListener('click', goFullscreen);
+$('#btnTest').addEventListener('click', async () => {
+  goFullscreen(); ensureAudio();
+  if (!window.isSecureContext) setMotionStatus('bad', 'Motion sensors need HTTPS — open this page over https://');
+  const ok = await enableMotion();
+  if (ok){ mode = 'test'; $('#testMsg').textContent = 'Swing your phone like a slap…'; }
+});
+$('#btnPlay').addEventListener('click', async () => {
+  goFullscreen(); ensureAudio();
+  if (needsPermissionPrompt()){
+    await enableMotion();
+    $('#btnPlay').textContent = 'TAP TO START';
+    return;   // iOS: the permission prompt consumed this tap; start on the next one
+  }
+  enableMotion();
+  startGame();
+});
+$('#btnMark').addEventListener('click', () => { goFullscreen(); ensureAudio(); enterMark(); });
+$('#btnQuit').addEventListener('click', e => { e.stopPropagation(); goHome(); });
+$('#btnAgain').addEventListener('click', () => { goFullscreen(); ensureAudio(); startGame(); });
+$('#btnHome').addEventListener('click', goHome);
+
+$('#tapzone').addEventListener('pointerdown', e => { e.preventDefault(); markNow(); });
+$('#mPlay').addEventListener('click', () => { if (vid.paused){ const p = vid.play(); if (p && p.catch) p.catch(()=>{}); } else vid.pause(); });
+$('#mBack').addEventListener('click', () => { vid.currentTime = Math.max(0, vtime() - 5); });
+$('#mRestart').addEventListener('click', () => playFrom(0));
+$('#mClear').addEventListener('click', () => { draft = []; renderCueList(); });
+$('#mSave').addEventListener('click', () => {
+  cues = draft.slice().sort((a, b) => a - b);
+  store.set('slap2.cues', cues);
+  goHome();
+});
+
+// Fallback input: tap anywhere during play (no sensor) or press Space
+rot.addEventListener('pointerdown', e => {
+  if (mode === 'play' && !motionSeen && !e.target.closest('button')) swing(1.2);
+});
+window.addEventListener('keydown', e => {
+  if (e.code !== 'Space') return;
+  e.preventDefault();
+  if (mode === 'mark') markNow();
+  else if (mode === 'play' || mode === 'test') swing(1.2);
+});
+
+refreshStart();
+</script>
+</body>
+</html>

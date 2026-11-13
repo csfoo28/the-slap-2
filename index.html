@@ -47,12 +47,12 @@
   .score{display:flex;gap:18px;font-weight:800;font-variant-numeric:tabular-nums;text-align:right;text-shadow:0 2px 6px #000}
   .score small{display:block;font-size:11px;color:var(--mute);letter-spacing:1.5px}
   .score b{font-size:calc(var(--u)*7)}
-  .target{position:absolute;right:max(20px,env(safe-area-inset-right));bottom:calc(var(--u)*12);width:calc(var(--u)*30);aspect-ratio:1;display:flex;align-items:center;justify-content:center}
-  .core{width:100%;height:100%;border-radius:50%;background:radial-gradient(circle at 40% 35%,#ff6a5f,var(--hot) 55%,#8e140d);display:flex;align-items:center;justify-content:center;font-size:calc(var(--u)*13);box-shadow:0 0 0 5px rgba(255,59,47,.25),0 6px 24px rgba(0,0,0,.6);opacity:.92}
+  .target{position:absolute;right:max(20px,env(safe-area-inset-right));bottom:calc(var(--u)*13);width:calc(var(--u)*16);aspect-ratio:1;display:flex;align-items:center;justify-content:center}
+  .core{width:100%;height:100%;border-radius:50%;background:radial-gradient(circle at 40% 35%,#ff6a5f,var(--hot) 55%,#8e140d);display:flex;align-items:center;justify-content:center;font-size:calc(var(--u)*7);box-shadow:0 0 0 4px rgba(255,59,47,.25),0 6px 24px rgba(0,0,0,.6);opacity:.92}
   .core.hit{animation:pop .25s}
   @keyframes pop{40%{transform:scale(1.2)}}
-  .ring{position:absolute;inset:0;border-radius:50%;border:5px solid var(--ink);opacity:0;box-shadow:0 0 12px rgba(0,0,0,.6)}
-  .cue-label{position:absolute;top:100%;left:-60%;right:-60%;margin-top:6px;text-align:center;font-family:Bangers,Impact,sans-serif;font-size:calc(var(--u)*6);letter-spacing:2px;color:var(--ink);text-shadow:0 2px 6px #000}
+  .ring{position:absolute;inset:0;border-radius:50%;border:4px solid var(--ink);opacity:0;box-shadow:0 0 12px rgba(0,0,0,.6)}
+  .cue-label{position:absolute;top:100%;right:0;white-space:nowrap;margin-top:6px;text-align:right;font-family:Bangers,Impact,sans-serif;font-size:calc(var(--u)*4.5);letter-spacing:2px;color:var(--ink);text-shadow:0 2px 6px #000}
   .cue-label.now{color:var(--perfect)}
   .cue-label.hint{font-family:Barlow,sans-serif;font-size:13px;letter-spacing:0;font-weight:800}
   .meter{height:12px;background:rgba(0,0,0,.55);border-radius:8px;overflow:hidden;position:relative;box-shadow:inset 0 0 0 1px var(--line)}

@@ -36,6 +36,8 @@
   button.big{font-family:Bangers,Impact,sans-serif;font-weight:400;font-size:28px;letter-spacing:1.5px;padding:12px;background:var(--hot);box-shadow:0 5px 0 #9b1a12;width:100%}
   button.big:active{transform:translateY(4px);box-shadow:0 1px 0 #9b1a12}
   button.ghost{background:rgba(0,0,0,.45);box-shadow:inset 0 0 0 1px rgba(255,255,255,.18);padding:8px 14px;font-size:14px}
+  #btnSkip{background:rgba(255,255,255,.92);color:#120a0a;box-shadow:none}
+  #btnSkip[hidden]{display:none}
   .row{display:flex;gap:8px;flex-wrap:wrap}
   .row>button{flex:1}
 
@@ -116,7 +118,10 @@
   <!-- PLAY HUD -->
   <div id="hud">
     <div class="topbar">
-      <button class="ghost" id="btnQuit">✕ Quit</button>
+      <div class="row" style="flex-wrap:nowrap">
+        <button class="ghost" id="btnQuit">✕ Quit</button>
+        <button class="ghost" id="btnSkip">Skip intro ⏭</button>
+      </div>
       <div class="score">
         <div><small>COMBO</small><b id="hudCombo">0</b></div>
         <div><small>SCORE</small><b id="hudScore">0</b></div>
@@ -209,6 +214,7 @@
 // Seconds into the video where each slap lands (from MM:SS:frames timecodes at 25 fps).
 const DEFAULT_CUES = [33.92, 36.16, 37.08, 38.00, 38.84, 40.08, 41.36, 42.28, 43.00, 48.48, 49.52, 54.12, 56.72, 57.52, 58.24, 58.80, 59.44, 60.00, 60.56, 61.00, 61.68, 65.40, 70.84];
 const LEAD = 1.6;                                   // seconds the ring takes to close
+const INTRO_END = 29.0;                             // "Skip intro" jumps here (00:29:00); first slap is 00:33:23
 const WIN = { perfect: 0.13, great: 0.26, good: 0.42 };
 const PTS = { perfect: 300, great: 200, good: 100 };
 const BASE_ACC = 15;   // m/s² of linear acceleration that counts as a swing at 1.0× sensitivity
@@ -568,6 +574,8 @@ function loop(){
       ring.style.opacity = 0; label.className = 'cue-label'; label.textContent = 'NICE WORK';
     }
   }
+  const skip = $('#btnSkip'), showSkip = mode === 'play' && t < INTRO_END;
+  if (skip.hidden === showSkip) skip.hidden = !showSkip;
   if (mode === 'mark') $('#markTime').textContent = t.toFixed(2) + 's';
 }
 requestAnimationFrame(loop);
@@ -634,6 +642,12 @@ $('#btnPlay').addEventListener('click', async () => {
 });
 $('#btnMark').addEventListener('click', () => { goFullscreen(); ensureAudio(); enterMark(); });
 $('#btnQuit').addEventListener('click', e => { e.stopPropagation(); goHome(); });
+$('#btnSkip').addEventListener('click', e => {
+  e.stopPropagation();
+  if (mode !== 'play' || vtime() >= INTRO_END) return;
+  playFrom(INTRO_END);
+  $('#btnSkip').hidden = true;
+});
 $('#btnAgain').addEventListener('click', () => { goFullscreen(); ensureAudio(); startGame(); });
 $('#btnHome').addEventListener('click', goHome);
 

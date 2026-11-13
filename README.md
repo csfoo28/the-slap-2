@@ -4,7 +4,7 @@ A mobile web mini game: watch the sketch and swing your phone like a slap when e
 Plain HTML/CSS/JS, no build step.
 
 - `index.html` — the whole game (video, motion detection, scoring, slap-marking mode)
-- `media/the-slap-2-360p.mp4` — the video (360p, ~2.6 MB, fully preloaded before play)
+- `media/the-slap-2-720p.mp4` — the video (720p, ~10 MB, fully preloaded before play)
 
 ## Run locally
 

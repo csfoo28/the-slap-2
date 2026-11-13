@@ -7,7 +7,109 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Slap Along</title>
+<meta name="apple-mobile-web-app-title" content="Slap Along">
+
+<!-- SEO -->
+<title>Slap Along – The Slap 2 Phone Swing Game | Free Browser Game</title>
+<meta name="description" content="Free mobile browser game based on the comedy sketch The Slap 2. Watch the video and swing your phone like a slap every time a slap lands. Score Perfect hits, build combos and beat your best — no download needed.">
+<meta name="keywords" content="The Slap 2, slap game, phone swing game, motion control game, rhythm game, browser game, mobile web game, Open Slather, Adam Rozenbachs">
+<meta name="author" content="csfoo28">
+<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+<link rel="canonical" href="https://the-slap-2.vercel.app/">
+
+<!-- Icons & install -->
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+
+<!-- Social share (Open Graph / X) -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Slap Along">
+<meta property="og:title" content="Slap Along – Swing your phone to The Slap 2">
+<meta property="og:description" content="Watch the sketch and swing your phone like a slap every time one lands. A free motion-controlled browser game.">
+<meta property="og:url" content="https://the-slap-2.vercel.app/">
+<meta property="og:image" content="https://the-slap-2.vercel.app/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Slap Along: swing your phone to slap along with The Slap 2">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Slap Along – Swing your phone to The Slap 2">
+<meta name="twitter:description" content="Watch the sketch and swing your phone like a slap every time one lands. Free, no download.">
+<meta name="twitter:image" content="https://the-slap-2.vercel.app/og-image.jpg">
+
+<!-- Structured data for search engines and AI answer engines -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": ["VideoGame", "WebApplication"],
+      "@id": "https://the-slap-2.vercel.app/#game",
+      "name": "Slap Along",
+      "alternateName": "The Slap 2 – Slap Along",
+      "url": "https://the-slap-2.vercel.app/",
+      "description": "A free mobile browser game: watch the comedy sketch The Slap 2 and swing your phone like a slap every time a slap lands on screen. Timing and swing strength are scored with Perfect, Great and Good ratings, combos and a final grade.",
+      "image": "https://the-slap-2.vercel.app/og-image.jpg",
+      "genre": ["Rhythm game", "Motion control game", "Party game"],
+      "gamePlatform": ["Web browser", "iOS Safari", "Android Chrome"],
+      "applicationCategory": "GameApplication",
+      "operatingSystem": "Any (iOS, Android, desktop browser)",
+      "playMode": "SinglePlayer",
+      "inLanguage": "en",
+      "isAccessibleForFree": true,
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "featureList": [
+        "Swing detection using the phone accelerometer and gyroscope",
+        "Perfect / Great / Good / Miss timing ratings with combo multiplier",
+        "Fullscreen landscape play",
+        "Skip intro",
+        "Mark your own slap timings and share them by link"
+      ],
+      "isBasedOn": {
+        "@type": "CreativeWork",
+        "name": "The Slap 2",
+        "author": { "@type": "Person", "name": "Adam Rozenbachs" },
+        "isPartOf": { "@type": "TVSeries", "name": "Open Slather" },
+        "dateCreated": "2015"
+      },
+      "codeRepository": "https://github.com/csfoo28/the-slap-2"
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://the-slap-2.vercel.app/#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How do you play Slap Along?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Open the site on your phone, allow motion access, and press Play. When the ring closes in on the hand, swing your phone like a slap. Hitting right as the slap lands in the video scores Perfect; swinging harder adds bonus points." }
+        },
+        {
+          "@type": "Question",
+          "name": "Do I need to download an app?",
+          "acceptedAnswer": { "@type": "Answer", "text": "No. Slap Along runs in the mobile browser (Safari on iPhone, Chrome on Android) and is free. You can add it to your home screen for a fullscreen experience." }
+        },
+        {
+          "@type": "Question",
+          "name": "Why does my phone ask for motion permission?",
+          "acceptedAnswer": { "@type": "Answer", "text": "The game reads your phone's accelerometer and gyroscope to detect the slap swing. On iPhone, Safari asks for permission on the first tap of Play; tap Play again to start." }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I play on a computer?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes. Without a motion sensor, press the Space bar or click to slap." }
+        },
+        {
+          "@type": "Question",
+          "name": "What is The Slap 2?",
+          "acceptedAnswer": { "@type": "Answer", "text": "The Slap 2 is a comedy sketch written by Adam Rozenbachs for the Australian TV sketch show Open Slather (2015). Slap Along is a fan-made game built around it." }
+        }
+      ]
+    }
+  ]
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Barlow:wght@400;600;800&display=swap" rel="stylesheet">
@@ -92,6 +194,16 @@
   .stats b{display:block;font-size:22px;font-variant-numeric:tabular-nums}
   .stats small{font-size:10px;letter-spacing:1px;color:var(--mute);font-weight:800}
 
+  /* about / faq */
+  #scrAbout{align-items:flex-start}
+  .about{max-width:720px;width:100%;margin:auto;gap:8px;user-select:text;-webkit-user-select:text}
+  .about-head{display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .about h2{font-family:Bangers,Impact,sans-serif;font-weight:400;font-size:30px;letter-spacing:1px;margin:0}
+  .about h3{font-family:Bangers,Impact,sans-serif;font-weight:400;font-size:22px;letter-spacing:1px;margin:8px 0 0;color:var(--hot2)}
+  .about h4{margin:6px 0 0;font-size:15px}
+  .about ol{margin:0;padding-left:20px;color:var(--mute);line-height:1.45;font-size:15px}
+  .about strong,.about b{color:var(--ink)}
+
   /* mark: video stays visible, panel on the right */
   #scrMark{justify-content:flex-end;padding:10px max(10px,env(safe-area-inset-right)) 10px 10px}
   .markpanel{width:min(44%,380px);height:100%;background:var(--panel);border-radius:var(--radius);padding:12px;display:flex;flex-direction:column;gap:8px;box-shadow:inset 0 0 0 1px var(--line);overflow:auto}
@@ -106,7 +218,7 @@
   textarea{width:100%;background:rgba(0,0,0,.5);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px;font:600 11px ui-monospace,monospace;resize:none}
   .empty{color:var(--mute);font-size:13px;text-align:center;padding:6px}
   #btnFs{position:absolute;top:10px;right:max(10px,env(safe-area-inset-right));z-index:5}
-  .playing #btnFs,.marking #btnFs{display:none}
+  .playing #btnFs,.marking #btnFs,#scrAbout.on ~ #btnFs{display:none!important}
 </style>
 </head>
 <body>
@@ -156,7 +268,10 @@
           <p class="small" id="loadText" style="margin-top:6px">Loading video… 0%</p>
         </div>
         <button class="big" id="btnPlay" disabled>LOADING…</button>
-        <button class="ghost" id="btnMark" disabled>Mark slap moments</button>
+        <div class="row" style="flex-wrap:nowrap">
+          <button class="ghost" id="btnMark" disabled>Mark slap moments</button>
+          <button class="ghost" id="btnAbout">How to play &amp; FAQ</button>
+        </div>
       </div>
     </div>
   </section>
@@ -185,6 +300,38 @@
         <button class="ghost" id="btnHome">Home</button>
       </div>
     </div>
+  </section>
+
+  <!-- ABOUT / FAQ (also the page's crawlable description) -->
+  <section id="scrAbout" class="dim" aria-labelledby="aboutTitle">
+    <article class="about card">
+      <header class="about-head">
+        <h2 id="aboutTitle">About Slap Along</h2>
+        <button class="ghost" id="btnAboutClose" aria-label="Close">✕ Close</button>
+      </header>
+      <p><strong>Slap Along</strong> is a free mobile browser game built around the comedy sketch <em>The Slap 2</em>. Watch the video and swing your phone like a slap every time a slap lands on screen. It's a motion-controlled rhythm game: the closer your swing is to the moment of the slap, the higher your score.</p>
+
+      <h3>How to play</h3>
+      <ol>
+        <li>Open the game on your phone and tap <b>Enable motion &amp; test swing</b>. Allow motion access and try a swing.</li>
+        <li>When the video has loaded, tap <b>PLAY</b>. On iPhone, the first tap asks for motion permission and the second tap starts the game.</li>
+        <li>When the ring closes in on the hand, swing your phone like a slap. <b>Skip intro</b> jumps to just before the first slap.</li>
+        <li>Grip the phone tight (or use a wrist strap) and keep clear of people and furniture.</li>
+      </ol>
+
+      <h3>Scoring</h3>
+      <p>Each slap is rated <b>Perfect</b>, <b>Great</b>, <b>Good</b> or <b>Miss</b> by timing. Harder swings add bonus points, hits in a row build a combo multiplier, and swinging at the wrong moment counts as a whiff. The round ends with a letter grade from S to D and your personal best.</p>
+
+      <h3>FAQ</h3>
+      <h4>Do I need to download an app?</h4>
+      <p>No. Slap Along runs in the mobile browser (Safari on iPhone, Chrome on Android) and is free. Add it to your home screen for fullscreen play.</p>
+      <h4>Why does my phone ask for motion permission?</h4>
+      <p>The game reads your phone's accelerometer and gyroscope to detect the slap swing. On iPhone, Safari asks for permission on the first tap of Play; tap Play again to start.</p>
+      <h4>Can I play on a computer?</h4>
+      <p>Yes. Without a motion sensor, press the Space bar or click to slap.</p>
+      <h4>What is The Slap 2?</h4>
+      <p><em>The Slap 2</em> is a comedy sketch written by Adam Rozenbachs for the Australian TV sketch show <em>Open Slather</em> (2015). Slap Along is a fan-made game built around it.</p>
+    </article>
   </section>
 
   <!-- MARK -->
@@ -650,6 +797,8 @@ $('#btnSkip').addEventListener('click', e => {
 });
 $('#btnAgain').addEventListener('click', () => { goFullscreen(); ensureAudio(); startGame(); });
 $('#btnHome').addEventListener('click', goHome);
+$('#btnAbout').addEventListener('click', () => show('scrAbout'));
+$('#btnAboutClose').addEventListener('click', () => show('scrStart'));
 
 $('#tapzone').addEventListener('pointerdown', e => { e.preventDefault(); markNow(); });
 $('#mPlay').addEventListener('click', () => { if (vid.paused){ const p = vid.play(); if (p && p.catch) p.catch(()=>{}); } else vid.pause(); });

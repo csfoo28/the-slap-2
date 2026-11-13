@@ -1,0 +1,29 @@
+# Slap Along
+
+> Slap Along is a free mobile browser game built around the comedy sketch "The Slap 2" (written by Adam Rozenbachs for the Australian TV sketch show Open Slather, 2015). Players watch the video and swing their phone like a slap every time a slap lands on screen; the phone's motion sensors detect the swing and score its timing and strength.
+
+- URL: https://the-slap-2.vercel.app/
+- Price: free, no download or sign-up; runs in Safari (iPhone), Chrome (Android) and desktop browsers
+- Genre: motion-controlled rhythm / party game, single player
+- Source code: https://github.com/csfoo28/the-slap-2
+
+## How to play
+
+1. Open the site on a phone, tap "Enable motion & test swing" and allow motion access.
+2. When the video has loaded, tap PLAY (on iPhone, the first tap asks for motion permission; tap again to start).
+3. When the ring closes in on the hand, swing the phone like a slap. "Skip intro" jumps to just before the first slap.
+4. Grip the phone firmly or use a wrist strap, and keep clear of people and furniture.
+
+## Scoring
+
+- Each of the 23 slaps is rated Perfect, Great, Good or Miss by timing.
+- Harder swings earn bonus points; consecutive hits build a combo multiplier.
+- Swinging at the wrong moment is a "whiff" and resets the combo.
+- The round ends with a letter grade (S, A, B, C or D) and a saved personal best.
+
+## FAQ
+
+- Do I need an app? No, it runs in the browser. Add it to the home screen for fullscreen play.
+- Why the motion permission? The game reads the accelerometer and gyroscope to detect the swing. iPhone Safari asks once.
+- Can I play on a computer? Yes: press Space or click to slap.
+- Is it official? No. It is a fan-made game based on the sketch "The Slap 2".

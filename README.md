@@ -30,8 +30,22 @@ Plain HTML/CSS/JS in a single page: no framework, no build step.
 
 | File | What it is |
 | --- | --- |
-| `index.html` | The whole game: markup, styles and script |
+| `index.html` | The whole game: markup, styles and script, plus SEO meta tags, social cards, JSON-LD and the About/FAQ panel |
 | `media/the-slap-2-720p.mp4` | The sketch video (720p, ~10 MB) |
+| `og-image.jpg` | 1200×630 social share image |
+| `favicon.svg`, `favicon-32.png`, `apple-touch-icon.png`, `icon-*.png` | Browser, home-screen and app icons |
+| `site.webmanifest` | Install-to-home-screen settings (fullscreen, landscape) |
+| `robots.txt`, `sitemap.xml` | Crawler rules (search engines and AI crawlers allowed) and sitemap |
+| `llms.txt` | Plain-text summary of the game for AI search and answer engines |
+
+## SEO and AI search
+
+- **Search engines:** descriptive title and meta description, canonical URL, `robots` meta, `sitemap.xml`
+- **Social sharing:** Open Graph and X (Twitter) card tags with `og-image.jpg`
+- **Structured data:** JSON-LD `VideoGame` / `WebApplication` and `FAQPage`
+- **AI search (GEO):** an About / FAQ panel in the page's HTML (readable without running JavaScript), `llms.txt`, and `robots.txt` that explicitly allows GPTBot, ClaudeBot, PerplexityBot, Google-Extended and other AI crawlers
+
+The site URL `https://the-slap-2.vercel.app/` is written into `index.html`, `robots.txt`, `sitemap.xml` and `llms.txt`. Update all four if the domain changes.
 
 ## Run locally
 

@@ -5,7 +5,14 @@ Plain HTML/CSS/JS, no build step.
 
 - `index.html` — the whole game (video, motion detection, scoring, slap-marking mode)
 - `media/the-slap-2-360p.mp4` — the video (360p, ~2.6 MB, fully preloaded before play)
-- `serve_https.py` — optional local server (`python serve_https.py` for HTTPS on the LAN with a self-signed cert in `certs/`, or `python serve_https.py 8090 --http` for local HTTP)
+
+## Run locally
+
+```bash
+python -m http.server 8095
+```
+
+Then open http://localhost:8095 (on a computer, press Space or tap to slap).
 
 ## Deploy
 
